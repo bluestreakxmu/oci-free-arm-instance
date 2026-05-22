@@ -161,7 +161,7 @@ jobs:
             ```
 
       - name: Send Telegram notification
-        if: always() && env.TELEGRAM_BOT_TOKEN != '' && env.TELEGRAM_CHAT_ID != ''
+        if: steps.create_vm.outcome == 'success' && env.TELEGRAM_BOT_TOKEN != '' && env.TELEGRAM_CHAT_ID != ''
         shell: bash
         env:
           STATUS: ${{ steps.create_vm.outcome }}
