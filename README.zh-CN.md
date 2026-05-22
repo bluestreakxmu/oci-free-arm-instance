@@ -12,7 +12,7 @@
 * **持续重试：** 工作流每 10 分钟运行一次，持续重试，直到成功创建 VM。
 * **安全：** 所有敏感凭据、密钥和 ID 都存储在加密的 GitHub Secrets 中。仓库本身不包含私密信息，可以安全公开。
 * **快速：** 使用 GitHub 缓存保存 `oci-cli` 安装内容，后续运行会更快。
-* **信息清晰：** 每次尝试都会向 Discord 频道发送详细通知，显示完整的成功或错误日志，例如 “Out of host capacity”。
+* **信息清晰：** 每次尝试都会向 Telegram 或 Discord 发送详细通知，显示完整的成功或错误日志，例如 “Out of host capacity”。
 
 ---
 
@@ -24,7 +24,7 @@
 
 * 一个 Oracle Cloud Infrastructure (OCI) “Always Free” 账号。
 * 一个 GitHub 账号。
-* 一个用于接收通知的 Discord 服务器或频道。
+* 一个用于接收通知的 Telegram 账号，或 Discord 服务器/频道。
 
 ---
 
@@ -96,7 +96,24 @@
 
 ---
 
-## 步骤 3：创建 Discord Webhook
+## 步骤 3：配置通知
+
+如果你没有 Discord，推荐使用 Telegram。
+
+### 方案 A：Telegram Bot
+
+1. 打开 Telegram，搜索 **@BotFather**。
+2. 发送 `/newbot`，按提示创建机器人，然后复制 bot token。这就是你的 `TELEGRAM_BOT_TOKEN`。
+3. 给你新建的 bot 发送任意一条消息。
+4. 在浏览器中打开下面的 URL，将 `<BOT_TOKEN>` 替换成你的 token：
+
+```text
+https://api.telegram.org/bot<BOT_TOKEN>/getUpdates
+```
+
+5. 在返回内容中找到 `chat.id`，这就是你的 `TELEGRAM_CHAT_ID`。
+
+### 方案 B：Discord Webhook
 
 1. 打开你的 Discord 服务器。右键点击一个频道名称，然后点击 **"Edit Channel"**。
 2. 进入 **"Integrations"** 标签页。
@@ -111,7 +128,7 @@
 
 1. 点击 **"Settings"** 标签页。
 2. 在左侧菜单中，点击 **"Secrets and variables"** -> **"Actions"**。
-3. 对下面列出的 **11 个 secrets**，逐个点击 **"New repository secret"** 创建。
+3. 对下面列出的 secrets，逐个点击 **"New repository secret"** 创建。
 
 #### **VM Secrets**
 
@@ -129,7 +146,14 @@
 * `OCI_CLI_FINGERPRINT`：步骤 2B 中的 fingerprint
 * `OCI_CLI_KEY_CONTENT`：用文本编辑器打开步骤 2B 下载的 `oci_api_key.pem` 文件。复制从 `-----BEGIN PRIVATE KEY-----` 到 `-----END PRIVATE KEY-----` 的完整内容，并粘贴到这里。
 
-#### **Notification Secret**
+#### **Notification Secrets**
+
+使用 Telegram：
+
+* `TELEGRAM_BOT_TOKEN`：步骤 3 中得到的 bot token
+* `TELEGRAM_CHAT_ID`：步骤 3 中得到的 chat ID
+
+或者使用 Discord：
 
 * `DISCORD_WEBHOOK_URL`：步骤 3 中复制的 Discord Webhook URL
 
@@ -147,7 +171,7 @@
 powershell -ExecutionPolicy Bypass -File .\scripts\configure-github-actions.ps1 -TriggerWorkflow
 ```
 
-该脚本会在需要时通过 `winget` 安装 GitHub CLI；如果你尚未登录 GitHub，它会提示你登录；然后设置仓库 secrets，并可选启动 workflow。
+该脚本会在需要时通过 `winget` 安装 GitHub CLI；如果你尚未登录 GitHub，它会提示你登录；然后设置仓库 secrets，并可选启动 workflow。如果你使用 Telegram，可以把 `DISCORD_WEBHOOK_URL` 留空。
 
 ---
 
@@ -159,13 +183,13 @@ powershell -ExecutionPolicy Bypass -File .\scripts\configure-github-actions.ps1 
 2. 在左侧边栏中点击 **"Try to Create OCI VM"**。
 3. 你会看到一条提示：“This workflow has a `workflow_dispatch` event.” 点击右侧的 **"Run workflow"** 按钮，然后再次点击 **"Run workflow"**。
 
-这会启动第一次运行。从此之后，`schedule` 会每 10 分钟自动运行一次。你可以在 "Actions" 标签页查看每次运行的日志。每次尝试也都会向 Discord 发送通知。
+这会启动第一次运行。从此之后，`schedule` 会每 10 分钟自动运行一次。你可以在 "Actions" 标签页查看每次运行的日志。每次尝试也都会向 Telegram 或 Discord 发送通知。
 
 ---
 
 ## 重要：成功后应该做什么
 
-某一天，你会在 Discord 中收到一条绿色的 **success** 通知。这表示你的 VM 已经创建成功。
+某一天，你会在 Telegram 或 Discord 中收到一条 **success** 通知。这表示你的 VM 已经创建成功。
 
 一看到成功通知，你就 **必须** 禁用此 workflow。
 

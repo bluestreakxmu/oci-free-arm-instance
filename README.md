@@ -12,7 +12,7 @@ This is necessary because the "Always Free" Arm instances are a popular resource
 * **Persistent:** The workflow runs on a 10-minute schedule, continuously retrying until it successfully provisions your VM.
 * **Secure:** All sensitive credentials, keys, and IDs are stored in encrypted GitHub Secrets. The repository itself contains no private information and is safe to be public.
 * **Fast:** Uses GitHub's caching to store the `oci-cli` installation, so subsequent runs are much faster.
-* **Informative:** Sends detailed notifications to a Discord channel on every attempt, showing the full success or error log (e.g., "Out of host capacity").
+* **Informative:** Sends detailed notifications to Telegram or Discord on every attempt, showing the full success or error log (e.g., "Out of host capacity").
 
 ---
 
@@ -24,7 +24,7 @@ To use this, you need to **Fork** this repository and set up your OCI credential
 
 * An Oracle Cloud Infrastructure (OCI) "Always Free" account.
 * A GitHub account.
-* A Discord server/channel to receive notifications.
+* A Telegram account, or a Discord server/channel, to receive notifications.
 
 ---
 
@@ -96,12 +96,29 @@ This is the key you will use to log in to your new server.
 
 ---
 
-## Step 3: Create a Discord Webhook
+## Step 3: Configure Notifications
 
-1.  Open your Discord server. Right-click on a channel name and click **"Edit Channel"**.
-2.  Go to the **"Integrations"** tab.
-3.  Click **"Webhooks"** -> **"New Webhook"**.
-4.  Give it a name (e.g., "OCI Notifier") and click **"Copy Webhook URL"**.
+Telegram is recommended if you do not have Discord.
+
+### Option A: Telegram Bot
+
+1. Open Telegram and search for **@BotFather**.
+2. Send `/newbot`, follow the prompts, and copy the bot token. This is your `TELEGRAM_BOT_TOKEN`.
+3. Send any message to your new bot.
+4. Open this URL in a browser, replacing `<BOT_TOKEN>` with your token:
+
+```text
+https://api.telegram.org/bot<BOT_TOKEN>/getUpdates
+```
+
+5. Find the `chat.id` value in the response. This is your `TELEGRAM_CHAT_ID`.
+
+### Option B: Discord Webhook
+
+1. Open your Discord server. Right-click on a channel name and click **"Edit Channel"**.
+2. Go to the **"Integrations"** tab.
+3. Click **"Webhooks"** -> **"New Webhook"**.
+4. Give it a name (e.g., "OCI Notifier") and click **"Copy Webhook URL"**.
 
 ---
 
@@ -111,7 +128,7 @@ Go to your forked repository on GitHub.
 
 1.  Click the **"Settings"** tab.
 2.  In the left menu, click **"Secrets and variables"** -> **"Actions"**.
-3.  Click the **"New repository secret"** button for *each* of the 11 secrets listed below.
+3.  Click the **"New repository secret"** button for each secret listed below.
 
 #### **VM Secrets**
 
@@ -129,7 +146,14 @@ Go to your forked repository on GitHub.
 * `OCI_CLI_FINGERPRINT` (Value: The fingerprint from Step 2B)
 * `OCI_CLI_KEY_CONTENT` (Value: Open the `oci_api_key.pem` file you downloaded in Step 2B with a text editor. Copy the *entire contents*, from `-----BEGIN PRIVATE KEY-----` to `-----END PRIVATE KEY-----`, and paste it here.)
 
-#### **Notification Secret**
+#### **Notification Secrets**
+
+Use Telegram:
+
+* `TELEGRAM_BOT_TOKEN` (Value: The bot token from Step 3)
+* `TELEGRAM_CHAT_ID` (Value: The chat ID from Step 3)
+
+Or use Discord:
 
 * `DISCORD_WEBHOOK_URL` (Value: The URL you copied from Discord in Step 3)
 
@@ -147,7 +171,7 @@ On Windows, you can set all GitHub Actions secrets from a local JSON file instea
 powershell -ExecutionPolicy Bypass -File .\scripts\configure-github-actions.ps1 -TriggerWorkflow
 ```
 
-The script installs GitHub CLI with `winget` if needed, asks you to sign in to GitHub if you are not already authenticated, sets the repository secrets, and optionally starts the workflow.
+The script installs GitHub CLI with `winget` if needed, asks you to sign in to GitHub if you are not already authenticated, sets the repository secrets, and optionally starts the workflow. You can leave `DISCORD_WEBHOOK_URL` empty if you use Telegram.
 
 ---
 
@@ -159,13 +183,13 @@ You're all set! Now you just need to start the process.
 2.  In the left sidebar, click on **"Try to Create OCI VM"**.
 3.  You will see a message: "This workflow has a `workflow_dispatch` event." Click the **"Run workflow"** button on the right, and then **"Run workflow"** again.
 
-This will start the first run. From now on, the `schedule` will automatically run it every 10 minutes. You can check the "Actions" tab to see the logs from each run. You will also get a notification in Discord every time it tries.
+This will start the first run. From now on, the `schedule` will automatically run it every 10 minutes. You can check the "Actions" tab to see the logs from each run. You will also get a notification in Telegram or Discord every time it tries.
 
 ---
 
 ## 🚨 CRITICAL: What to Do on Success
 
-One day, you will get a **green "success"** notification in Discord. This means your VM has been created!
+One day, you will get a **success** notification in Telegram or Discord. This means your VM has been created!
 
 As soon as you see this, you **MUST** disable the workflow.
 

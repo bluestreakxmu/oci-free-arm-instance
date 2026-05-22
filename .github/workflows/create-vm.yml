@@ -24,6 +24,8 @@ env:
   OCI_CLI_FINGERPRINT: ${{ secrets.OCI_CLI_FINGERPRINT }}
   OCI_CLI_KEY_CONTENT: ${{ secrets.OCI_CLI_KEY_CONTENT }}
   DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+  TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+  TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
 
 jobs:
   create-vm:
@@ -155,3 +157,20 @@ jobs:
             ```text
             ${{ steps.create_vm.outputs.log_data }}
             ```
+
+      - name: Send Telegram notification
+        if: always() && env.TELEGRAM_BOT_TOKEN != '' && env.TELEGRAM_CHAT_ID != ''
+        shell: bash
+        env:
+          STATUS: ${{ steps.create_vm.outcome }}
+          LOG_DATA: ${{ steps.create_vm.outputs.log_data }}
+        run: |
+          set -uo pipefail
+
+          RUN_URL="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          MESSAGE="$(printf 'OCI VM Status: %s\n\nAttempt to create A1.Flex VM.\nStatus: %s\nRun: %s\n\nLog output:\n%s\n' "$STATUS" "$STATUS" "$RUN_URL" "$LOG_DATA")"
+
+          curl --fail --silent --show-error \
+            --request POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+            --data-urlencode "chat_id=${TELEGRAM_CHAT_ID}" \
+            --data-urlencode "text=${MESSAGE}"

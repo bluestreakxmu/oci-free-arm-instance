@@ -140,6 +140,14 @@ if ($config.DISCORD_WEBHOOK_URL -and -not [string]::IsNullOrWhiteSpace([string]$
   $secretValues["DISCORD_WEBHOOK_URL"] = [string]$config.DISCORD_WEBHOOK_URL
 }
 
+if ($config.TELEGRAM_BOT_TOKEN -and -not [string]::IsNullOrWhiteSpace([string]$config.TELEGRAM_BOT_TOKEN)) {
+  $secretValues["TELEGRAM_BOT_TOKEN"] = [string]$config.TELEGRAM_BOT_TOKEN
+}
+
+if ($config.TELEGRAM_CHAT_ID -and -not [string]::IsNullOrWhiteSpace([string]$config.TELEGRAM_CHAT_ID)) {
+  $secretValues["TELEGRAM_CHAT_ID"] = [string]$config.TELEGRAM_CHAT_ID
+}
+
 Ensure-GitHubCli
 Ensure-GitHubAuth
 
