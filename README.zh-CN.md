@@ -78,11 +78,11 @@
     * 如果仍然找不到镜像，可以查看此网站，按区域选择镜像并复制对应 OCID：<https://docs.oracle.com/en-us/iaas/images/>
     * 将这个 `IMAGE_ID` 配置到你的 action 环境中。
 4. **OCPU 和内存**
-    * 此 action 默认创建 2 个 OCPU、12 GB 内存的实例。
-    * 你可以在 action 中修改这一行：`--shape-config '{"ocpus":2,"memoryInGBs":12}' \`
+    * 此 action 默认创建 4 个 OCPU、24 GB 内存的实例。
+    * 你可以在 action 中修改这一行：`--shape-config '{"ocpus":4,"memoryInGBs":24}' \`
 6. **启动卷和实例名称**
-    * 此 action 默认创建 `100` GB 启动卷，实例名称为 `coolify-vm`。
-    * 你可以在 action 中修改启动卷大小：`--boot-volume-size-in-gbs 100' \`
+    * 此 action 默认创建 `200` GB 启动卷，实例名称为 `coolify-vm`。
+    * 你可以在 action 中修改启动卷大小：`--boot-volume-size-in-gbs 200' \`
     * 你也可以在同一个命令中修改实例名称：`--display-name "coolify-vm"`
 
 ### D. 你的 SSH 公钥

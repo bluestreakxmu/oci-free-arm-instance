@@ -120,13 +120,13 @@ jobs:
             --compartment-id "$COMPARTMENT_ID" \
             --availability-domain "$AD_NAME" \
             --shape "VM.Standard.A1.Flex" \
-            --shape-config '{"ocpus":2,"memoryInGBs":12}' \
+            --shape-config '{"ocpus":4,"memoryInGBs":24}' \
             --subnet-id "$SUBNET_ID" \
             --image-id "$IMAGE_ID" \
             --ssh-authorized-keys-file "$RUNNER_TEMP/ssh_public_key.pub" \
             --assign-public-ip true \
             --display-name "coolify-vm" \
-            --boot-volume-size-in-gbs 100 \
+            --boot-volume-size-in-gbs 200 \
             > "$OCI_OUTPUT_FILE" 2>&1
           OCI_STATUS=$?
           set -e

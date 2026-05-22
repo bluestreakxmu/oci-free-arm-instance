@@ -78,11 +78,11 @@ This is the most detailed step. You need to gather **11 pieces of information** 
     * If you still can not find the image, check this website and choose your image and copy ocid mentioned according to region. <https://docs.oracle.com/en-us/iaas/images/>
     * set this `IMAGE_ID` in your action env.
 4.  **OCPUs and RAM**
-    * The default settings in this action is to provision instance with 2 OCPUs and 12 GB memory.
-    * you can change this in action line 59 `--shape-config '{"ocpus":2,"memoryInGBs":12}' \`
+    * The default settings in this action is to provision instance with 4 OCPUs and 24 GB memory.
+    * you can change this in action line 59 `--shape-config '{"ocpus":4,"memoryInGBs":24}' \`
 6. **Boot Volume and Name**
-    * The default settings in this action is to provision instance with `100`GB boot volume with name `coolify-vm`.
-    * you can change bootvolume in action line 65 `--boot-volume-size-in-gbs 100' \`
+    * The default settings in this action is to provision instance with `200`GB boot volume with name `coolify-vm`.
+    * you can change bootvolume in action line 65 `--boot-volume-size-in-gbs 200' \`
     * you can change instance name in same command (action line 64) `--display-name "coolify-vm"`
    
 ### D. Your SSH Public Key
