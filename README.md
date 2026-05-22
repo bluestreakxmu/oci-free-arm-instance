@@ -12,7 +12,7 @@ This is necessary because the "Always Free" Arm instances are a popular resource
 * **Persistent:** The workflow runs every 10 minutes from 07:00 to 22:50 Asia/Shanghai, continuously retrying until it successfully provisions your VM.
 * **Secure:** All sensitive credentials, keys, and IDs are stored in encrypted GitHub Secrets. The repository itself contains no private information and is safe to be public.
 * **Fast:** Uses GitHub's caching to store the `oci-cli` installation, so subsequent runs are much faster.
-* **Informative:** Sends a Telegram notification when the VM is successfully created. Discord notifications can also be configured if you want attempt-by-attempt status updates.
+* **Informative:** Sends a Telegram notification when the VM is successfully created, then disables the workflow to stop future scheduled runs. Discord notifications can also be configured if you want attempt-by-attempt status updates.
 
 ---
 
@@ -187,18 +187,13 @@ This will start the first run. From now on, the `schedule` will automatically ru
 
 ---
 
-## 🚨 CRITICAL: What to Do on Success
+## What Happens on Success
 
-One day, you will get a **success** notification in Telegram or Discord. This means your VM has been created!
+One day, you will get a **success** notification in Telegram or Discord. This means your VM has been created.
 
-As soon as you see this, you **MUST** disable the workflow.
+After a successful VM creation, the workflow automatically disables itself through the GitHub API. This stops future scheduled runs, so it will not keep trying to create another VM.
 
-1.  Go to the **"Actions"** tab in your repository.
-2.  Click on **"Try to Create OCI VM"** in the sidebar.
-3.  Click the **three-dot (...)** menu on the right.
-4.  Click **"Disable workflow"**.
-
-If you do not do this, the action will continue running every 10 minutes during its scheduled daytime window and will try to create *another* VM, which will just fill your logs with errors.
+If you ever want to run it again, go to the **"Actions"** tab, click **"Try to Create OCI VM"**, and click **"Enable workflow"**.
 
 Your VM will be provisioning in the OCI console. You can now log in using the SSH key you provided.
 

@@ -12,7 +12,7 @@
 * **持续重试：** 工作流在北京时间 07:00 到 22:50 每 10 分钟运行一次，持续重试，直到成功创建 VM。
 * **安全：** 所有敏感凭据、密钥和 ID 都存储在加密的 GitHub Secrets 中。仓库本身不包含私密信息，可以安全公开。
 * **快速：** 使用 GitHub 缓存保存 `oci-cli` 安装内容，后续运行会更快。
-* **信息清晰：** VM 创建成功时会向 Telegram 发送通知。如果你希望每次尝试都收到状态更新，也可以配置 Discord 通知。
+* **信息清晰：** VM 创建成功时会向 Telegram 发送通知，然后自动禁用 workflow，停止后续定时运行。如果你希望每次尝试都收到状态更新，也可以配置 Discord 通知。
 
 ---
 
@@ -187,18 +187,13 @@ powershell -ExecutionPolicy Bypass -File .\scripts\configure-github-actions.ps1 
 
 ---
 
-## 重要：成功后应该做什么
+## 成功后会发生什么
 
 某一天，你会在 Telegram 或 Discord 中收到一条 **success** 通知。这表示你的 VM 已经创建成功。
 
-一看到成功通知，你就 **必须** 禁用此 workflow。
+VM 创建成功后，workflow 会通过 GitHub API 自动禁用自身。这会停止后续定时运行，避免继续尝试创建另一台 VM。
 
-1. 进入仓库的 **"Actions"** 标签页。
-2. 点击左侧边栏里的 **"Try to Create OCI VM"**。
-3. 点击右侧的 **three-dot (...)** 菜单。
-4. 点击 **"Disable workflow"**。
-
-如果不这样做，action 会继续在白天定时窗口内每 10 分钟运行一次，并尝试创建 *另一台* VM，最终只会让日志里充满错误。
+如果以后还想再次运行它，进入仓库的 **"Actions"** 标签页，点击 **"Try to Create OCI VM"**，再点击 **"Enable workflow"**。
 
 你的 VM 会在 OCI Console 中进入 provisioning 状态。现在可以使用你提供的 SSH 密钥登录服务器。
 
