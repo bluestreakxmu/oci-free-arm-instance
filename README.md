@@ -9,7 +9,7 @@ This is necessary because the "Always Free" Arm instances are a popular resource
 ## Features
 
 * **Fully Automated:** Runs entirely within GitHub Actions. You don't need to run anything on your local machine.
-* **Persistent:** The workflow runs every 10 minutes from 07:00 to 22:50 Asia/Shanghai, continuously retrying until it successfully provisions your VM.
+* **Persistent:** The workflow runs every 10 minutes, continuously retrying until it successfully provisions your VM.
 * **Secure:** All sensitive credentials, keys, and IDs are stored in encrypted GitHub Secrets. The repository itself contains no private information and is safe to be public.
 * **Fast:** Uses GitHub's caching to store the `oci-cli` installation, so subsequent runs are much faster.
 * **Informative:** Sends a Telegram notification when the VM is successfully created, then disables the workflow to stop future scheduled runs. Discord notifications can also be configured if you want attempt-by-attempt status updates.
@@ -183,7 +183,7 @@ You're all set! Now you just need to start the process.
 2.  In the left sidebar, click on **"Try to Create OCI VM"**.
 3.  You will see a message: "This workflow has a `workflow_dispatch` event." Click the **"Run workflow"** button on the right, and then **"Run workflow"** again.
 
-This will start the first run. From now on, the `schedule` will automatically run every 10 minutes from 07:00 to 22:50 Asia/Shanghai. You can check the "Actions" tab to see the logs from each run. If you use Telegram, you will only get a notification when the VM is successfully created.
+This will start the first run. From now on, the `schedule` will automatically run every 10 minutes. You can check the "Actions" tab to see the logs from each run. If you use Telegram, you will only get a notification when the VM is successfully created.
 
 ---
 
