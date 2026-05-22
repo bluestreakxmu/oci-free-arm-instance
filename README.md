@@ -1,6 +1,6 @@
 # OCI Always Free Arm (A1.Flex) VM Creator
 
-[![Try to Create OCI VM](https://github.com/heykapil/oci-free-arm-instance/actions/workflows/create-vm.yml/badge.svg)](https://github.com/heykapil/oci-free-arm-instance/actions/workflows/create-vm.yml)
+[![Try to Create OCI VM](https://github.com/bluestreakxmu/oci-free-arm-instance/actions/workflows/create-vm.yml/badge.svg)](https://github.com/bluestreakxmu/oci-free-arm-instance/actions/workflows/create-vm.yml)
 
 This repository contains a GitHub Actions workflow that automatically tries to provision an "Always Free" `VM.Standard.A1.Flex` (Arm) compute instance in your Oracle Cloud Infrastructure (OCI) account.
 

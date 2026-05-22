@@ -1,0 +1,157 @@
+name: Try to Create OCI VM
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: try-create-oci-vm
+  cancel-in-progress: false
+
+env:
+  COMPARTMENT_ID: ${{ secrets.OCI_COMPARTMENT_ID }}
+  IMAGE_ID: ${{ secrets.IMAGE_ID }}
+  SUBNET_ID: ${{ secrets.OCI_SUBNET_ID }}
+  AD_NAME: ${{ secrets.AD_NAME }}
+  SSH_PUBLIC_KEY: ${{ secrets.SSH_PUBLIC_KEY }}
+  OCI_CLI_REGION: ${{ secrets.OCI_CLI_REGION }}
+  OCI_CLI_USER: ${{ secrets.OCI_CLI_USER }}
+  OCI_CLI_TENANCY: ${{ secrets.OCI_CLI_TENANCY }}
+  OCI_CLI_FINGERPRINT: ${{ secrets.OCI_CLI_FINGERPRINT }}
+  OCI_CLI_KEY_CONTENT: ${{ secrets.OCI_CLI_KEY_CONTENT }}
+  DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+
+jobs:
+  create-vm:
+    name: Try to create A1.Flex VM
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Cache OCI CLI installation
+        uses: actions/cache@v4
+        with:
+          path: ~/.local
+          key: ${{ runner.os }}-oci-cli-v1
+
+      - name: Add user Python bin to PATH
+        run: echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Setup OCI CLI and try to create VM
+        id: create_vm
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -uo pipefail
+
+          LOG_FILE="$RUNNER_TEMP/oci-create-vm.log"
+          : > "$LOG_FILE"
+
+          write_log_output() {
+            {
+              echo "log_data<<EOF"
+              tail -c 3500 "$LOG_FILE"
+              echo
+              echo "EOF"
+            } >> "$GITHUB_OUTPUT"
+          }
+
+          fail() {
+            echo "$1" | tee -a "$LOG_FILE"
+            write_log_output
+            exit 1
+          }
+
+          missing=()
+          for name in \
+            COMPARTMENT_ID \
+            IMAGE_ID \
+            SUBNET_ID \
+            AD_NAME \
+            SSH_PUBLIC_KEY \
+            OCI_CLI_REGION \
+            OCI_CLI_USER \
+            OCI_CLI_TENANCY \
+            OCI_CLI_FINGERPRINT \
+            OCI_CLI_KEY_CONTENT
+          do
+            if [[ -z "${!name:-}" ]]; then
+              missing+=("$name")
+            fi
+          done
+
+          if (( ${#missing[@]} > 0 )); then
+            fail "Missing required GitHub secrets or environment values: ${missing[*]}"
+          fi
+
+          if ! command -v oci >/dev/null 2>&1; then
+            echo "Installing OCI CLI..." | tee -a "$LOG_FILE"
+            python -m pip install --user --upgrade oci-cli >> "$LOG_FILE" 2>&1 || fail "Failed to install OCI CLI."
+          else
+            echo "Using cached OCI CLI: $(oci --version)" | tee -a "$LOG_FILE"
+          fi
+
+          mkdir -p "$HOME/.oci"
+          printf "%s\n" "$OCI_CLI_KEY_CONTENT" > "$HOME/.oci/oci_api_key.pem"
+          chmod 600 "$HOME/.oci/oci_api_key.pem"
+
+          {
+            echo "[DEFAULT]"
+            echo "user=$OCI_CLI_USER"
+            echo "tenancy=$OCI_CLI_TENANCY"
+            echo "fingerprint=$OCI_CLI_FINGERPRINT"
+            echo "key_file=$HOME/.oci/oci_api_key.pem"
+            echo "region=$OCI_CLI_REGION"
+          } > "$HOME/.oci/config"
+          chmod 600 "$HOME/.oci/config"
+
+          printf "%s\n" "$SSH_PUBLIC_KEY" > "$RUNNER_TEMP/ssh_public_key.pub"
+
+          echo "Launching VM.Standard.A1.Flex instance..." | tee -a "$LOG_FILE"
+          OCI_OUTPUT_FILE="$RUNNER_TEMP/oci-launch-output.log"
+          oci compute instance launch \
+            --compartment-id "$COMPARTMENT_ID" \
+            --availability-domain "$AD_NAME" \
+            --shape "VM.Standard.A1.Flex" \
+            --shape-config '{"ocpus":2,"memoryInGBs":12}' \
+            --subnet-id "$SUBNET_ID" \
+            --image-id "$IMAGE_ID" \
+            --ssh-authorized-keys-file "$RUNNER_TEMP/ssh_public_key.pub" \
+            --assign-public-ip true \
+            --display-name "coolify-vm" \
+            --boot-volume-size-in-gbs 100 \
+            > "$OCI_OUTPUT_FILE" 2>&1
+          OCI_STATUS=$?
+
+          cat "$OCI_OUTPUT_FILE" >> "$LOG_FILE"
+
+          if grep -q '"lifecycle-state": "PROVISIONING"' "$OCI_OUTPUT_FILE"; then
+            echo "Success: OCI returned lifecycle-state PROVISIONING." | tee -a "$LOG_FILE"
+            write_log_output
+            exit 0
+          fi
+
+          echo "OCI CLI exited with status $OCI_STATUS and did not return PROVISIONING." | tee -a "$LOG_FILE"
+          write_log_output
+          exit 1
+
+      - name: Send Discord notification
+        if: always() && env.DISCORD_WEBHOOK_URL != ''
+        uses: sarisia/actions-status-discord@v1.15.4
+        with:
+          webhook: ${{ env.DISCORD_WEBHOOK_URL }}
+          title: "OCI VM Status: ${{ steps.create_vm.outcome }}"
+          status: ${{ steps.create_vm.outcome }}
+          color: ${{ steps.create_vm.outcome == 'success' && '0x28a745' || '0xdc3545' }}
+          description: |
+            Attempt to create A1.Flex VM.
+            Status: `${{ steps.create_vm.outcome }}`
+
+            Log output:
+            ```text
+            ${{ steps.create_vm.outputs.log_data }}
+            ```
