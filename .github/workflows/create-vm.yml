@@ -115,6 +115,7 @@ jobs:
 
           echo "Launching VM.Standard.A1.Flex instance..." | tee -a "$LOG_FILE"
           OCI_OUTPUT_FILE="$RUNNER_TEMP/oci-launch-output.log"
+          set +e
           oci compute instance launch \
             --compartment-id "$COMPARTMENT_ID" \
             --availability-domain "$AD_NAME" \
@@ -128,6 +129,7 @@ jobs:
             --boot-volume-size-in-gbs 100 \
             > "$OCI_OUTPUT_FILE" 2>&1
           OCI_STATUS=$?
+          set -e
 
           cat "$OCI_OUTPUT_FILE" >> "$LOG_FILE"
 
@@ -173,4 +175,5 @@ jobs:
           curl --fail --silent --show-error \
             --request POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
             --data-urlencode "chat_id=${TELEGRAM_CHAT_ID}" \
-            --data-urlencode "text=${MESSAGE}"
+            --data-urlencode "text=${MESSAGE}" \
+            --data-urlencode "disable_web_page_preview=true"
