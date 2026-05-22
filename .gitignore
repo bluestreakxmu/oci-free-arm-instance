@@ -1,0 +1,3 @@
+scripts/secrets.local.json
+oci_api_key.pem
+*.pem

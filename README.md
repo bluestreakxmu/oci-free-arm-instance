@@ -133,6 +133,22 @@ Go to your forked repository on GitHub.
 
 * `DISCORD_WEBHOOK_URL` (Value: The URL you copied from Discord in Step 3)
 
+### Automated secret setup
+
+On Windows, you can set all GitHub Actions secrets from a local JSON file instead of entering them one by one in the GitHub UI.
+
+1. Copy `scripts/secrets.example.json` to `scripts/secrets.local.json`.
+2. Fill in `scripts/secrets.local.json` with the values from the steps above.
+   * Use `OCI_CLI_KEY_FILE` to point to your downloaded `oci_api_key.pem`, or use `OCI_CLI_KEY_CONTENT` with the private key content.
+   * `scripts/secrets.local.json` and `*.pem` files are ignored by Git and should not be committed.
+3. Run:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\configure-github-actions.ps1 -TriggerWorkflow
+```
+
+The script installs GitHub CLI with `winget` if needed, asks you to sign in to GitHub if you are not already authenticated, sets the repository secrets, and optionally starts the workflow.
+
 ---
 
 ## Step 5: Run the Workflow
