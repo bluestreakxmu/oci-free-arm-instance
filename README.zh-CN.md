@@ -9,7 +9,7 @@
 ## 功能特性
 
 * **完全自动化：** 全部运行在 GitHub Actions 中。你不需要在本地电脑上运行任何东西。
-* **持续重试：** 工作流每 10 分钟运行一次，持续重试，直到成功创建 VM。
+* **持续重试：** 工作流在北京时间 07:00 到 22:50 每 10 分钟运行一次，持续重试，直到成功创建 VM。
 * **安全：** 所有敏感凭据、密钥和 ID 都存储在加密的 GitHub Secrets 中。仓库本身不包含私密信息，可以安全公开。
 * **快速：** 使用 GitHub 缓存保存 `oci-cli` 安装内容，后续运行会更快。
 * **信息清晰：** VM 创建成功时会向 Telegram 发送通知。如果你希望每次尝试都收到状态更新，也可以配置 Discord 通知。
@@ -183,7 +183,7 @@ powershell -ExecutionPolicy Bypass -File .\scripts\configure-github-actions.ps1 
 2. 在左侧边栏中点击 **"Try to Create OCI VM"**。
 3. 你会看到一条提示：“This workflow has a `workflow_dispatch` event.” 点击右侧的 **"Run workflow"** 按钮，然后再次点击 **"Run workflow"**。
 
-这会启动第一次运行。从此之后，`schedule` 会每 10 分钟自动运行一次。你可以在 "Actions" 标签页查看每次运行的日志。如果使用 Telegram，只有 VM 创建成功时才会收到通知。
+这会启动第一次运行。从此之后，`schedule` 会在北京时间 07:00 到 22:50 每 10 分钟自动运行一次。你可以在 "Actions" 标签页查看每次运行的日志。如果使用 Telegram，只有 VM 创建成功时才会收到通知。
 
 ---
 
@@ -198,7 +198,7 @@ powershell -ExecutionPolicy Bypass -File .\scripts\configure-github-actions.ps1 
 3. 点击右侧的 **three-dot (...)** 菜单。
 4. 点击 **"Disable workflow"**。
 
-如果不这样做，action 会继续每 10 分钟运行一次，并尝试创建 *另一台* VM，最终只会让日志里充满错误。
+如果不这样做，action 会继续在白天定时窗口内每 10 分钟运行一次，并尝试创建 *另一台* VM，最终只会让日志里充满错误。
 
 你的 VM 会在 OCI Console 中进入 provisioning 状态。现在可以使用你提供的 SSH 密钥登录服务器。
 

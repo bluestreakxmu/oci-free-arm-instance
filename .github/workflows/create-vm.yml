@@ -2,7 +2,8 @@ name: Try to Create OCI VM
 
 on:
   schedule:
-    - cron: "*/10 * * * *"
+    # Runs every 10 minutes from 07:00 to 22:50 Asia/Shanghai.
+    - cron: "*/10 23,0-14 * * *"
   workflow_dispatch:
 
 permissions:
